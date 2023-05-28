@@ -90,7 +90,7 @@ function getPage(message) {
     + "    <p>" + OS.hostname() + "</p>\n"
     + "  </div>\n"
     + "  <div class=\"bottomleft\">\n"
-    + "    <p>" + message + "</p>\n"
+    + "    <p>" + messag + "</p>\n"
     + "  </div>\n"
     + "</div>\n"
     + "\n"
