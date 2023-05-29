@@ -39,14 +39,17 @@ jobs:
        secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
        region: us-east-1
     - name: Push to ECR
+      id: push
       run: |
         docker build -t test-pipeline:${{ github.run_number }} .
         docker tag test-pipeline:${{ github.run_number }} 224841346245k.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
         docker push 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }} 
     - name: Update kube config
+      id: k8s
       run: aws eks update-kubeconfig --name test-pipeline
       
     - name: Update deployment file
+      id: up
       env:
         ECR_REPO_URL: 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline
         RUNNER_NUMBER: ${{ github.run_number }}
@@ -55,6 +58,7 @@ jobs:
         cat deployment.yaml 
     
     - name: Deploy to EKS
+      id: dep
       run: |
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml
