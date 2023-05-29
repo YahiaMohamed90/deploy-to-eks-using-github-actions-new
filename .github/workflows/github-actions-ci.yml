@@ -18,11 +18,11 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1  
         
-#    - name: Install kubectl
- #     uses: azure/setup-kubectl@v2.0
-  #    with:
-   #     version: 'v1.24.0' # default is latest stable
-    #  id: install   
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v2.0
+      with:
+        version: 'v1.24.0' # default is latest stable
+      id: install   
 
     - name: Setup EKS Kubectl
       uses: zachguo/setup-eks-kubectl@v1
@@ -41,8 +41,8 @@ jobs:
     - name: Push to ECR
       run: |
         docker build -t test-pipeline .
-        docker tag test-pipeline:latest 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:latest
-        docker push 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:latest 
+        docker tag test-pipeline:${{ github.run_number }} 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
+        docker push 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }} 
 
 
     - name: Update kube config
