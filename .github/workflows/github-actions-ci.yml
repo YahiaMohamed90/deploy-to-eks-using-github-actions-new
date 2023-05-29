@@ -7,33 +7,16 @@ jobs:
   deploy:
     runs-on: 
       - self-hosted
-     
     steps:
-    
     - name: Checkout code
       uses: actions/checkout@v3
       
     - name: Configure AWS Credentials
-      id: aws
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1  
-        
-        
-        
-    - name: Notify Slack - Build Step 1
-      uses: rtCamp/action-slack-notify@v2.2.0
-      if: ${{ failure() }}
-      env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      with:
-          status: ${{ job.status }}
-          fields: repo,message,author,commit,action,eventName,workflow,time,status
-          mentions: '@channel'
-          pretext: 'New code pushed to *main* branch'
-          color: ${{ job.status == 'success' }}
         
     - name: Install kubectl
       uses: azure/setup-kubectl@v2.0
@@ -55,32 +38,15 @@ jobs:
        access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
        secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
        region: us-east-1
-    - name: Push to ECR 
-      id: push
+    - name: Push to ECR
       run: |
         docker build -t test-pipeline:${{ github.run_number }} .
-        docker tag test-pipeline:${{ github.run_number }} 2248413462450000.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
+        docker tag test-pipeline:${{ github.run_number }} 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
         docker push 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }} 
-        
-        
-    - name: Notify Slack - push
-      uses: rtCamp/action-slack-notify@v2.2.0
-      if: ${{ failure() }}
-      env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      with:
-          status: ${{ job.status }}
-          fields: repo,message,author,commit,action,eventName,workflow,time,status
-          mentions: '@channel'
-          pretext: 'New code pushed to *main* branch'
-          color: ${{ job.status == 'success' }}    
-
     - name: Update kube config
-      id: k8sconfig
       run: aws eks update-kubeconfig --name test-pipeline
       
     - name: Update deployment file
-      id: update-deployment
       env:
         ECR_REPO_URL: 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline
         RUNNER_NUMBER: ${{ github.run_number }}
@@ -89,13 +55,10 @@ jobs:
         cat deployment.yaml 
     
     - name: Deploy to EKS
-      id: deploy
       run: |
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml
         
-        
-   
     - name: Notify Slack
       uses: rtCamp/action-slack-notify@v2.2.0
       env:
@@ -105,4 +68,4 @@ jobs:
           fields: repo,message,author,commit,action,eventName,workflow,time,status
           mentions: '@channel'
           pretext: 'New code pushed to *main* branch'
-          color: ${{ job.status == 'success' }} # green for success, red for failure
+          color: ${{ job.status == 'success' }} # green for success, red for failure  
