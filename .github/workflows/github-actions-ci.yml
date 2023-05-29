@@ -46,7 +46,7 @@ jobs:
        secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
        region: us-east-1
     - name: Push to ECR 
-      id: ECR
+      id: push
       run: |
         docker build -t test-pipeline:${{ github.run_number }} .
         docker tag test-pipeline:${{ github.run_number }} 2248413462450000.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
