@@ -40,7 +40,7 @@ jobs:
        region: us-east-1
     - name: Push to ECR
       run: |
-        docker build -t test-pipeline .
+        docker build -t test-pipeline:${{ github.run_number }} .
         docker tag test-pipeline:${{ github.run_number }} 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
         docker push 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }} 
 
