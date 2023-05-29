@@ -52,7 +52,7 @@ jobs:
         ECR_REPO_URL: 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline
         RUNNER_NUMBER: ${{ github.run_number }}
       run: |
-        sed -i \"s|image:.*|image: $ECR_REPO_URL:$RUNNER_NUMBER|g\" deployment.yaml
+        sed -i "s|image:.*|image:$ECR_REPO_URL:$RUNNER_NUMBER|g"  deployment.yaml
         cat deployment.yaml 
     
     - name: Deploy to EKS
