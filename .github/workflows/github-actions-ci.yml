@@ -58,15 +58,13 @@ jobs:
       run: |
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml
-        
-    - name: Notify Slack
-      uses: rtCamp/action-slack-notify@v2.2.0
+          
+    - name: Notify Slack     
+    - uses: act10ns/slack@v1
       env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       with:
           status: ${{ job.status }}
-          fields: repo,message,author,commit,action,eventName,workflow,time,status
-          mentions: '@channel'
-          pretext: 'New code pushed to *main* branch'
-          color: ${{ job.status == 'success' }} # green for success, red for failure  
-          if: always()
+          steps: ${{ toJson(steps) }}
+          channel: '#workflows'
+      if: always()
