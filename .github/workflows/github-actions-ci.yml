@@ -7,6 +7,8 @@ jobs:
   deploy:
     runs-on: 
       - self-hosted
+    env: 
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -64,8 +66,6 @@ jobs:
         kubectl apply -f service.yaml
           
     - name: Notify Slack  
-      env:
-         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     - uses: act10ns/slack@v1
       with:
           status: ${{ job.status }}
