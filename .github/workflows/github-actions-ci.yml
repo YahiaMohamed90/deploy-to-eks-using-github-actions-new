@@ -44,9 +44,16 @@ jobs:
         docker tag test-pipeline:${{ github.run_number }} 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
         docker push 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }} 
 
-
     - name: Update kube config
       run: aws eks update-kubeconfig --name test-pipeline
+      
+    - name: Update deployment file
+      env:
+        ECR_REPO_URL: 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline
+        RUNNER_NUMBER: ${{ github.run_number }}
+      run: |
+        sed -i "s/image:.*/image: $ECR_REPO_URL:$RUNNER_NUMBER/" deployment.yaml
+        cat deployment.yaml 
     
     - name: Deploy to EKS
       run: |
