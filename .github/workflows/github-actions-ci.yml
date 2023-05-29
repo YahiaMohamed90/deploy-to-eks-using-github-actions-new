@@ -44,7 +44,7 @@ jobs:
       id: push
       run: |
         docker build -t test-pipeline:${{ github.run_number }} .
-        docker tag test-pipeline:${{ github.run_number }} 224841346245k.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
+        docker tag test-pipeline:${{ github.run_number }} 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
         docker push 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }} 
     - name: Update kube config
       id: k8s
