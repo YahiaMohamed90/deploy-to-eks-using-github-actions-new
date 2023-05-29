@@ -41,7 +41,7 @@ jobs:
     - name: Push to ECR
       run: |
         docker build -t test-pipeline:${{ github.run_number }} .
-        docker tag test-pipeline:${{ github.run_number }} 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
+        docker tag test-pipeline:${{ github.run_number }} 224841346245k.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }}
         docker push 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:${{ github.run_number }} 
     - name: Update kube config
       run: aws eks update-kubeconfig --name test-pipeline
@@ -69,3 +69,4 @@ jobs:
           mentions: '@channel'
           pretext: 'New code pushed to *main* branch'
           color: ${{ job.status == 'success' }} # green for success, red for failure  
+          if: always()
