@@ -12,14 +12,14 @@ const express = require('express');
 const PORT = 8080;
 const HOST = '0.0.0.0';
 const OS = require('os');
-const ENV = 'kortobaa integrated solutions';
+const ENV = 'kortobaa';
 
 
 // App
 const app = express();
 app.get('/', (req, res) => {
   res.statusCode = 200;
-  const msg = 'Hello from from Primus Learning, this was awesome';
+  const msg = 'Hello from from kortobaa integrated solution';
   res.send(getPage(msg));
 });
 
