@@ -8,9 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     env: 
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        CLUSTER : maqare
-        REGION : me-central-1
-        CHANEL : '#devops'
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -20,7 +17,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: $REGION   
+        aws-region: me-central-1 
         
     - name: Install kubectl
       uses: azure/setup-kubectl@v2.0
@@ -31,8 +28,8 @@ jobs:
     - name: Setup EKS Kubectl
       uses: zachguo/setup-eks-kubectl@v1
       with:
-       cluster: $CLUSTER
-       region: $REGION
+       cluster: maqare
+       region: me-central-1
        namespace: default
              
     - name: Login to ECR
@@ -52,7 +49,7 @@ jobs:
         
     - name: Update kube config
       id: Login_to_EKS_Cluster
-      run: aws eks update-kubeconfig --name $CLUSTER
+      run: aws eks update-kubeconfig --name maqare
       
     - name: Update deployment file
       id: update_Deployment_file_with_latest_tag_of_the_image 
@@ -73,5 +70,5 @@ jobs:
       with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          channel: $CHANEL
+          channel: '#devops'
       if: always()
