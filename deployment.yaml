@@ -19,4 +19,4 @@ spec:
           image: 224841346245.dkr.ecr.us-east-1.amazonaws.com/test-pipeline:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 5000
+            - containerPort: 8080
