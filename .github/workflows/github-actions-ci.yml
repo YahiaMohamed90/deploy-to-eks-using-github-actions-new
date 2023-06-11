@@ -44,7 +44,7 @@ jobs:
        region: me-central-1
        
     - name: Push to ECR
-      id: build image & push to ECR  
+      id: build image and push to ECR  
       run: |
         docker build -t test:${{ github.run_number }} .
         docker tag test:${{ github.run_number }} 224841346245.dkr.ecr.me-central-1.amazonaws.com/test:${{ github.run_number }}
