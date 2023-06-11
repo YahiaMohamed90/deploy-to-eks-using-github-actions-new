@@ -28,7 +28,7 @@ jobs:
     - name: Setup EKS Kubectl
       uses: zachguo/setup-eks-kubectl@v1
       with:
-       cluster: maqare
+       cluster: test
        region: me-central-1
        namespace: default
              
@@ -49,7 +49,7 @@ jobs:
         
     - name: Update kube config
     # id: k8s
-      run: aws eks update-kubeconfig --name maqare
+      run: aws eks update-kubeconfig --name test
       
     - name: Update deployment file
     # id: up
