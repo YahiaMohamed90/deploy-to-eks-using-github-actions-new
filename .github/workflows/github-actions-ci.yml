@@ -36,7 +36,7 @@ jobs:
        namespace: default
              
     - name: Login to ECR
-      id: Login to ECR
+      id: login to ecr
       uses: jwalton/gh-ecr-login@v2.0.4
       with:
        access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -44,7 +44,7 @@ jobs:
        region: me-central-1
        
     - name: Push to ECR
-      id: build image and push to ECR  
+      id: build image and push to ecr 
       run: |
         docker build -t test:${{ github.run_number }} .
         docker tag test:${{ github.run_number }} 224841346245.dkr.ecr.me-central-1.amazonaws.com/test:${{ github.run_number }}
@@ -55,7 +55,7 @@ jobs:
       run: aws eks update-kubeconfig --name $CLUSTER
       
     - name: Update deployment file
-      id: update deployment file with latest tag of the image 
+      id: update Deployment file with latest tag of the image 
       env:
         ECR_REPO_URL: 224841346245.dkr.ecr.me-central-1.amazonaws.com/test
         RUNNER_NUMBER: ${{ github.run_number }}
@@ -64,7 +64,7 @@ jobs:
         cat deployment.yaml 
     
     - name: Deploy to EKS
-      id: deploy an image on Eks Cluster
+      id: deploy an image on eks Cluster
       run: |
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml
