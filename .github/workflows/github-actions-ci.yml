@@ -11,8 +11,10 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      id: pull_the_code
       
     - name: Configure AWS Credentials
+      id: aws_configure
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -44,8 +46,8 @@ jobs:
       id: build_image_and_push_to_ecr 
       run: |
         docker build -t test:${{ github.run_number }} .
-        docker tag test:${{ github.run_number }} 224841346245.dkr.ecr.me-central-1.amazonaws.com/test:${{ github.run_number }}
-        docker push 224841346245.dkr.ecr.me-central-1.amazonaws.com/test:${{ github.run_number }}
+        docker tag test:${{ github.run_number }} 224841346245.dkr.ecr.me-central-1.amazonaws.com/maqare-production:${{ github.run_number }}
+        docker push 224841346245.dkr.ecr.me-central-1.amazonaws.com/maqare-production:${{ github.run_number }}
         
     - name: Update kube config
       id: Login_to_EKS_Cluster
@@ -54,7 +56,7 @@ jobs:
     - name: Update deployment file
       id: update_Deployment_file_with_latest_tag_of_the_image 
       env:
-        ECR_REPO_URL: 224841346245.dkr.ecr.me-central-1.amazonaws.com/test
+        ECR_REPO_URL: 224841346245.dkr.ecr.me-central-1.amazonaws.com/maqare-production
         RUNNER_NUMBER: ${{ github.run_number }}
       run: |
         sed -i "s|image:.*|image: $ECR_REPO_URL:$RUNNER_NUMBER|g"  deployment.yaml
