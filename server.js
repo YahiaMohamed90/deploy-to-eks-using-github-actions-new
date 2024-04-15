@@ -1,4 +1,4 @@
-// before rum
+// before ruum
 //npm install express
 
 // to run 
