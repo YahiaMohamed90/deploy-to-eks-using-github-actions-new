@@ -41,6 +41,23 @@ jobs:
         docker build -t test-image:${{ github.run_number }} .
         docker tag test-image  us-central1-docker.pkg.dev/halameet/maqare/test-image:${{ github.run_number }}
         docker push us-central1-docker.pkg.dev/halameet/maqare/test-image:${{ github.run_number }}
+
+             
+    - name: Update deployment file
+      id: update_Deployment_file_with_latest_tag_of_the_image 
+      env:
+        ECR_REPO_URL: us-central1-docker.pkg.dev/halameet/maqare/test-image
+        RUNNER_NUMBER: ${{ github.run_number }}
+      run: |
+        sed -i "s|image:.*|image: $ECR_REPO_URL:$RUNNER_NUMBER|g"  deployment.yaml
+        cat deployment.yaml 
+    
+    - name: Deploy to EKS
+      id: deploy_an_image_on_eks_Cluster
+      run: |
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
+          
         
  
     - uses: act10ns/slack@v1
