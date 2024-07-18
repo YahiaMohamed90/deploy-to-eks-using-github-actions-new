@@ -1,4 +1,4 @@
-name: Node js app deploy to GKE
+name: Node js app deploy to EKS
 on:
   push:
     branches: [ "main" ]
@@ -8,45 +8,53 @@ jobs:
     runs-on: ubuntu-latest
     env: 
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-        GKE_CLUSTER: maqare-production    # Add your cluster name here.
-        GKE_ZONE: us-central1-c   # Add your cluster zone here.
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-      id: pull_the_code
       
-    - name: Setup gcloud CLI
-      uses: google-github-actions/setup-gcloud@1bee7de035d65ec5da40a31f8589e240eba8fde5
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
       with:
-        service_account_key: ${{ secrets.GKE_SA_KEY }}
-        project_id: ${{ secrets.GKE_PROJECT }}
-
-    # Configure Docker to use the gcloud command-line tool as a credential
-    # helper for authentication
-    - run: |-
-            gcloud --quiet auth configure-docker
-
-    - name: Get the GKE credentials so we can deploy to the cluster
-      uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: me-central-1 
+        
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v2.0
       with:
-        cluster_name: ${{ env.GKE_CLUSTER }}
-        location: ${{ env.GKE_ZONE }}
-        credentials: ${{ secrets.GKE_SA_KEY }}
-  
+        version: 'v1.24.0' # default is latest stable
+      id: install_kubectl  
+
+    - name: Setup EKS Kubectl
+      uses: zachguo/setup-eks-kubectl@v1
+      with:
+       cluster: maqare
+       region: me-central-1
+       namespace: default
+             
+    - name: Login to ECR
+      id: login_to_ecr
+      uses: jwalton/gh-ecr-login@v2.0.4
+      with:
+       access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+       secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+       region: me-central-1
        
     - name: Push to ECR
       id: build_image_and_push_to_ecr 
       run: |
-        docker build -t test-image:${{ github.run_number }} .
-        docker tag test-image  us-central1-docker.pkg.dev/halameet/maqare/test-image:${{ github.run_number }}
-        docker push us-central1-docker.pkg.dev/halameet/maqare/test-image:${{ github.run_number }}
-
-             
+        docker build -t test:${{ github.run_number }} .
+        docker tag test:${{ github.run_number }} 339713055603.dkr.ecr.us-east-1.amazonaws.com/lawhaty:${{ github.run_number }}
+        docker push 339713055603.dkr.ecr.us-east-1.amazonaws.com/lawhaty:${{ github.run_number }}
+        
+    - name: Update kube config
+      id: Login_to_EKS_Cluster
+      run: aws eks update-kubeconfig --name maqare
+      
     - name: Update deployment file
       id: update_Deployment_file_with_latest_tag_of_the_image 
       env:
-        ECR_REPO_URL: us-central1-docker.pkg.dev/halameet/maqare/test-image
+        ECR_REPO_URL: 339713055603.dkr.ecr.us-east-1.amazonaws.com/lawhaty
         RUNNER_NUMBER: ${{ github.run_number }}
       run: |
         sed -i "s|image:.*|image: $ECR_REPO_URL:$RUNNER_NUMBER|g"  deployment.yaml
@@ -58,8 +66,6 @@ jobs:
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml
           
-        
- 
     - uses: act10ns/slack@v1
       with:
           status: ${{ job.status }}
